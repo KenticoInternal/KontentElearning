@@ -1,0 +1,16 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "",
+        "FUNCTIONS_WORKER_RUNTIME": "node",
+        "IsDevelopment": true,
+        "BuildCourseServerUrl": "http://localhost:51355",
+        "ScormAppId": "xyz",
+        "ScormAppSecret": "xyz",
+        "AdaptGhBranch": "new-build",
+        "AdaptGhUsername": "GithubUsername",
+        "AdaptGhToken": "GitHubAccessToken",
+        "AdaptGhOwner": "KenticoInternal",
+        "AdaptGhRepository": "ElearningAdaptV2"
+    }
+}
