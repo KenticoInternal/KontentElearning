@@ -12,7 +12,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     try {
         context.log(`Initializing variables`);
 
-        const body: IRequestData = req.rawBody ? JSON.parse(req.rawBody) : {};
+        const body: IRequestData = req.body ?? {};
 
         if (!body.courseId) {
             throw Error(
@@ -36,8 +36,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         // This is a folder in Azure function where we have write access to
         const azureSharedFolderPath = `D:\\home`;
-        const dataFolderName = `elearning-data`;
-        const commitFolderPrefix = 'commit_';
+        const dataFolderName = `e-data`;
+        const commitFolderPrefix = 'gh_';
 
         // prepare folder where course will be downloaded to
         const mainFolder: string = isDevelopment ? homedir() : azureSharedFolderPath;
@@ -99,7 +99,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             }
 
             // create clone folder
-            context.log(`Create new folder '${commitFolderName}'`)
+            context.log(`Create new folder '${commitFolderName}'`);
             mkdirSync(commitFolderName);
 
             const githubCloneUrl: string = `https://${adaptGhUsername}:${adaptGhToken}@github.com/${adaptGhOwner}/${adaptGhRepository}`;
