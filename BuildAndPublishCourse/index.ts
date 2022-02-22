@@ -1,5 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from '@azure/functions';
-import { mkdirSync, existsSync } from 'fs';
+import { mkdirSync, existsSync, readdirSync, rmdirSync } from 'fs';
 import { execSync } from 'child_process';
 import { homedir } from 'os';
 import { environmentHelper, GithubService, processHelper } from '../Lib';
@@ -37,6 +37,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // This is a folder in Azure function where we have write access to
         const azureSharedFolderPath = `D:\\home`;
         const dataFolderName = `elearning-data`;
+        const commitFolderPrefix = 'commit_';
 
         // prepare folder where course will be downloaded to
         const mainFolder: string = isDevelopment ? homedir() : azureSharedFolderPath;
@@ -75,27 +76,38 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         context.log(`Last commit identifier = '${lastCommitIdentifier}'`);
 
-        const cloneFolder: string = `${dataFolderPath}\\${lastCommitIdentifier}`;
-        const repositoryFolder: string = `${dataFolderPath}\\${lastCommitIdentifier}\\${adaptGhRepository}`;
+        const commitFolderName: string = `${commitFolderPrefix}${lastCommitIdentifier}`;
+
+        const cloneFolder: string = `${dataFolderPath}\\${commitFolderName}`;
+        const repositoryFolder: string = `${cloneFolder}\\${adaptGhRepository}`;
 
         // go to data folder
         processHelper.changeWorkingDirectory(dataFolderPath);
 
         if (existsSync(cloneFolder)) {
-            context.log(`GitHub repository was already cloned for this commit identifier`);
+            context.log(`GitHub repository already exists for folder '${cloneFolder}'`);
         } else {
-            // create clone folder
-            mkdirSync(lastCommitIdentifier);
+            // first clean old commit folders as we are limited by space in Azure functions
+            const commitFolders = readdirSync(dataFolderPath);
 
-            const githubCloneUrl: string = ``;
-            context.log(`Cloning '${githubCloneUrl}'`);
-
-            execSync(
-                `git clone -b ${adaptGhBranch} https://${adaptGhUsername}:${adaptGhToken}@github.com/${adaptGhOwner}/${adaptGhRepository}`,
-                {
-                    cwd: cloneFolder // sets directory context for cloning
+            for (const folder of commitFolders) {
+                if (folder.toLowerCase().startsWith(commitFolderPrefix.toLowerCase())) {
+                    // only delete folder with our prefix -> this is to prevent accidental deletion on other folders
+                    context.log(`Deleting previous commit folder '${folder}'`);
+                    rmdirSync(folder, { recursive: true });
                 }
-            );
+            }
+
+            // create clone folder
+            context.log(`Create new folder '${commitFolderName}'`)
+            mkdirSync(commitFolderName);
+
+            const githubCloneUrl: string = `https://${adaptGhUsername}:${adaptGhToken}@github.com/${adaptGhOwner}/${adaptGhRepository}`;
+            context.log(`Cloning branch '${adaptGhBranch}' of '${githubCloneUrl}'`);
+
+            execSync(`git clone -b ${adaptGhBranch} ${githubCloneUrl}`, {
+                cwd: cloneFolder // sets directory context for cloning
+            });
 
             context.log(`Installing dependencies in '${repositoryFolder}'`);
 
