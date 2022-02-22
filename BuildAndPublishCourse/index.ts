@@ -1,5 +1,5 @@
 import { AzureFunction, Context, HttpRequest } from '@azure/functions';
-import { mkdirSync, existsSync, readdirSync, rmdirSync } from 'fs';
+import { mkdirSync, existsSync, readdirSync, rmSync } from 'fs';
 import { execSync } from 'child_process';
 import { homedir } from 'os';
 import { environmentHelper, GithubService, processHelper } from '../Lib';
@@ -94,7 +94,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 if (folder.toLowerCase().startsWith(commitFolderPrefix.toLowerCase())) {
                     // only delete folder with our prefix -> this is to prevent accidental deletion on other folders
                     context.log(`Deleting previous commit folder '${folder}'`);
-                    rmdirSync(folder, { recursive: true });
+                    rmSync(folder, { recursive: true });
                 }
             }
 
