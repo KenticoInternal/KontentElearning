@@ -15,15 +15,15 @@ Configuration template can be found in `local.settings.template` file in the roo
 
 | Property  | Purpose | Default value |
 | ------------- | ------------- | ------------- |
-| IsDevelopment | Specifies environment | true |
-| BuildCourseServerUrl | Url of Data Generator server | http://localhost:51355 |
-| ScormAppId | Id of Scorm Cloud app  |CDDI0XIXXR |
-| ScormAppSecret | Secret of Scorm Cloud app | xxx |
-| AdaptGhBranch | Name of Adapt branch that is used for building course | new-build (will be prod) |
-| AdaptGhUsername | Name of GitHub user for authentication to Adapt Branch | xxx |
-| AdaptGhToken | Access token for Github user | xxx |
-| AdaptGhOwner | Owner of Adapt repository | KenticoInternal |
-| AdaptGhRepository | Name of the Adapt repository | ElearningAdaptV2 |
+| `IsDevelopment` | Specifies environment | true |
+| `BuildCourseServerUrl` | Url of Data Generator server | http://localhost:51355 |
+| `ScormAppId` | Id of Scorm Cloud app  |CDDI0XIXXR |
+| `ScormAppSecret` | Secret of Scorm Cloud app | xxx |
+| `AdaptGhBranch` | Name of Adapt branch that is used for building course | new-build (will be prod) |
+| `AdaptGhUsername` | Name of GitHub user for authentication to Adapt Branch | xxx |
+| `AdaptGhToken` | Access token for Github user | xxx |
+| `AdaptGhOwner` | Owner of Adapt repository | KenticoInternal |
+| `AdaptGhRepository` | Name of the Adapt repository | ElearningAdaptV2 |
 
 
 ## Functions
