@@ -132,7 +132,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         context.log(`Publishing course '${courseId}'`);
 
         execSync(
-            `npm run publish:scormcloud  -- courseId=k01 scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
+            `npm run publish:scormcloud  -- courseId=${courseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
             {
                 cwd: repositoryFolder
             }
