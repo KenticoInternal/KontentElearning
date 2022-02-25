@@ -6,6 +6,7 @@ import { environmentHelper, GithubService, processHelper } from '../Lib';
 
 interface IRequestData {
     courseId?: string;
+    isPreview?: boolean
 }
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -19,6 +20,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 `Could not generate course because course could not be identifier. Use 'courseId' body parameter to identify course.`
             );
         }
+
+        const isPreview: boolean = body.isPreview ?? false;
         const courseId: string = body.courseId;
 
         context.log(`Starting process for course '${courseId}'`);
@@ -120,7 +123,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // build & publish course
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
 
-        execSync(`npm run get:course -- courseId=${courseId} serverUrl=${buildCourseServerUrl}`, {
+        execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl}`, {
             cwd: repositoryFolder
         });
 
@@ -132,7 +135,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         context.log(`Publishing course '${courseId}'`);
 
         execSync(
-            `npm run publish:scormcloud  -- courseId=${courseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
+            `npm run publish:scormcloud  -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
             {
                 cwd: repositoryFolder
             }
