@@ -24,7 +24,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const isPreview: boolean = body.isPreview ?? false;
         const courseId: string = body.courseId;
 
-        context.log(`Starting process for course '${courseId}'`);
+        context.log(`Starting process for course '${courseId}' and API '${isPreview ? 'preview' : 'prod'}'`);
 
         // prepare env variables
         const isDevelopment = environmentHelper.getRequiredValue('IsDevelopment')?.toLowerCase() === 'true';
