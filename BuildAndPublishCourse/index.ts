@@ -6,7 +6,9 @@ import { environmentHelper, GithubService, processHelper } from '../Lib';
 
 interface IRequestData {
     courseId?: string;
-    isPreview?: boolean
+    scormCloudCourseTitle?: string;
+    scormCloudCourseId: string;
+    isPreview?: boolean;
 }
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -17,14 +19,22 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         if (!body.courseId) {
             throw Error(
-                `Could not generate course because course could not be identifier. Use 'courseId' body parameter to identify course.`
+                `Use 'courseId' body parameter to identify course.`
             );
         }
 
+        if (!body.scormCloudCourseId) {
+            throw Error(
+                `Use 'scormCloudCourseId' body parameter to identify course id in Scorm Cloud.`
+            );
+        }
+
+        const scormCloudCourseTitle: string = body.scormCloudCourseTitle ?? '';
         const isPreview: boolean = body.isPreview ?? false;
         const courseId: string = body.courseId;
+        const scormCloudCourseId: string = body.scormCloudCourseId;
 
-        context.log(`Starting process for course '${courseId}' and API '${isPreview ? 'preview' : 'prod'}'`);
+        context.log(`Starting process for course '${courseId}' and API '${isPreview ? 'preview' : 'prod'}' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id`);
 
         // prepare env variables
         const isDevelopment = environmentHelper.getRequiredValue('IsDevelopment')?.toLowerCase() === 'true';
@@ -135,7 +145,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         context.log(`Publishing course '${courseId}'`);
 
         execSync(
-            `npm run publish:scormcloud  -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
+            `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId=${scormCloudCourseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
             {
                 cwd: repositoryFolder
             }
