@@ -36,6 +36,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             );
         }
 
+        const kenticoScriptCompletedText: string = 'KenticoScriptCompleted';
         const scormCloudCourseTitle: string = body.scormCloudCourseTitle ?? '';
         const isPreview: boolean = body.isPreview ?? false;
         const courseId: string = body.courseId;
@@ -141,27 +142,35 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // build & publish course
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
 
-        const result1 = execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`, {
+        const getCourseScriptResult = execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`, {
             cwd: repositoryFolder
-        });
+        }).toString();
 
-        const test1 = result1.toString();
+        if (!getCourseScriptResult.includes(kenticoScriptCompletedText)) {
+            throw Error(`Failed to run script: ${getCourseScriptResult}`);
+        }
 
         context.log(`Building adapt course`);
-        const buildScriptResult = execSync(`npm run build`, {
+        const buildScriptResult = execSync(`npm run build:course`, {
             cwd: repositoryFolder
-        });
+        }).toString();
 
-        const test = buildScriptResult.toString();
+        if (!buildScriptResult.includes(kenticoScriptCompletedText)) {
+            throw Error(`Failed to run script: ${buildScriptResult}`);
+        }
 
         context.log(`Publishing course '${courseId}'`);
 
-        execSync(
+        const publishScriptResult = execSync(
             `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId=${scormCloudCourseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret}`,
             {
                 cwd: repositoryFolder
             }
-        );
+        ).toString();
+
+        if (!publishScriptResult.includes(kenticoScriptCompletedText)) {
+            throw Error(`Failed to run script: ${publishScriptResult}`);
+        }
 
         context.log(`Finished`);
 
