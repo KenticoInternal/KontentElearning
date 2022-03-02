@@ -141,14 +141,18 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // build & publish course
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
 
-        execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`, {
+        const result1 = execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`, {
             cwd: repositoryFolder
         });
 
+        const test1 = result1.toString();
+
         context.log(`Building adapt course`);
-        execSync(`npm run build`, {
+        const buildScriptResult = execSync(`npm run build`, {
             cwd: repositoryFolder
         });
+
+        const test = buildScriptResult.toString();
 
         context.log(`Publishing course '${courseId}'`);
 
