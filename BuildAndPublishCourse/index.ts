@@ -9,6 +9,7 @@ interface IRequestData {
     scormCloudCourseTitle?: string;
     scormCloudCourseId: string;
     isPreview?: boolean;
+    projectId?: string;
 }
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
@@ -23,6 +24,12 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             );
         }
 
+        if (!body.projectId) {
+            throw Error(
+                `Use 'projectId' body parameter to identify kontent project.`
+            );
+        }
+
         if (!body.scormCloudCourseId) {
             throw Error(
                 `Use 'scormCloudCourseId' body parameter to identify course id in Scorm Cloud.`
@@ -32,9 +39,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const scormCloudCourseTitle: string = body.scormCloudCourseTitle ?? '';
         const isPreview: boolean = body.isPreview ?? false;
         const courseId: string = body.courseId;
+        const projectId: string = body.projectId;
         const scormCloudCourseId: string = body.scormCloudCourseId;
 
-        context.log(`Starting process for course '${courseId}' and API '${isPreview ? 'preview' : 'prod'}' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id`);
+        context.log(`Starting process for course '${courseId}' and API '${isPreview ? 'preview' : 'prod'}' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id. Kontent project id '${projectId}'`);
 
         // prepare env variables
         const isDevelopment = environmentHelper.getRequiredValue('IsDevelopment')?.toLowerCase() === 'true';
@@ -133,7 +141,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // build & publish course
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
 
-        execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl}`, {
+        execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`, {
             cwd: repositoryFolder
         });
 

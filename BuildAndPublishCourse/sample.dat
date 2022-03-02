@@ -2,5 +2,6 @@
     "courseId": "k01",
     "isPreview": false,
     "scormCloudCourseTitle": "My course",
-    "scormCloudCourseId": "m02_dev"
+    "scormCloudCourseId": "m02_dev",
+    "projectId": "xxx"
 }
