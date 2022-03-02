@@ -39,4 +39,4 @@ In order for this to work locally the Data Generator (`BuildCourseServerUrl`) ha
 | ------------- | ------------- | 
 | http://localhost:7071/api/BuildAndPublishCourse | URL
 | POST | Request type
-| ```{"courseId": "k01"}``` | Json data
+| ```{"courseId": "k01","isPreview": false,"scormCloudCourseTitle": "My course","scormCloudCourseId": "m02_dev","projectId": "xxx"}``` | Json data
