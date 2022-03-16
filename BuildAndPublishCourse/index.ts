@@ -19,21 +19,15 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const body: IRequestData = req.body ?? {};
 
         if (!body.courseId) {
-            throw Error(
-                `Use 'courseId' body parameter to identify course.`
-            );
+            throw Error(`Use 'courseId' body parameter to identify course.`);
         }
 
         if (!body.projectId) {
-            throw Error(
-                `Use 'projectId' body parameter to identify kontent project.`
-            );
+            throw Error(`Use 'projectId' body parameter to identify kontent project.`);
         }
 
         if (!body.scormCloudCourseId) {
-            throw Error(
-                `Use 'scormCloudCourseId' body parameter to identify course id in Scorm Cloud.`
-            );
+            throw Error(`Use 'scormCloudCourseId' body parameter to identify course id in Scorm Cloud.`);
         }
 
         const kenticoScriptCompletedText: string = 'KenticoScriptCompleted';
@@ -43,7 +37,11 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const projectId: string = body.projectId;
         const scormCloudCourseId: string = body.scormCloudCourseId;
 
-        context.log(`Starting process for course '${courseId}' and API '${isPreview ? 'preview' : 'prod'}' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id. Kontent project id '${projectId}'`);
+        context.log(
+            `Starting process for course '${courseId}' and API '${
+                isPreview ? 'preview' : 'prod'
+            }' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id. Kontent project id '${projectId}'`
+        );
 
         // prepare env variables
         const isDevelopment = environmentHelper.getRequiredValue('IsDevelopment')?.toLowerCase() === 'true';
@@ -127,22 +125,30 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             const githubCloneUrl: string = `https://${adaptGhUsername}:${adaptGhToken}@github.com/${adaptGhOwner}/${adaptGhRepository}`;
             context.log(`Cloning branch '${adaptGhBranch}' of '${githubCloneUrl}'`);
 
-            execSync(`git clone -b ${adaptGhBranch} ${githubCloneUrl}`, {
+            const gitCloneScript = `git clone -b ${adaptGhBranch} ${githubCloneUrl}`;
+            context.log(`Executing git script: ${gitCloneScript}`);
+            execSync(gitCloneScript, {
                 cwd: cloneFolder // sets directory context for cloning
             });
 
             context.log(`Installing dependencies in '${repositoryFolder}'`);
 
             // install dependencies only once for each unique commit
-            execSync(`npm i`, {
+            const installNpmScript = `npm i`;
+            context.log(`Executing npm script: ${installNpmScript}`);
+            execSync(installNpmScript, {
                 cwd: repositoryFolder
             });
         }
 
         // build & publish course
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
+        const getCourseDataNpmScript = `npm run get:course -- isPreview=${
+            isPreview ? 'true' : 'false'
+        } courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`;
+        context.log(`Executing npm script: ${getCourseDataNpmScript}`);
 
-        const getCourseScriptResult = execSync(`npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`, {
+        const getCourseScriptResult = execSync(getCourseDataNpmScript, {
             cwd: repositoryFolder
         }).toString();
 
@@ -151,7 +157,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         }
 
         context.log(`Building adapt course`);
-        const buildScriptResult = execSync(`npm run build:course`, {
+        const buildNpmScript = `npm run build:course`;
+        context.log(`Executing npm script: ${buildNpmScript}`);
+        const buildScriptResult = execSync(buildNpmScript, {
             cwd: repositoryFolder
         }).toString();
 
@@ -161,12 +169,13 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         context.log(`Publishing course '${courseId}'`);
 
-        const publishScriptResult = execSync(
-            `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId=${scormCloudCourseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret} isPreview=${isPreview ? 'true' : 'false'}`,
-            {
-                cwd: repositoryFolder
-            }
-        ).toString();
+        const publishNpmScript = `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId=${scormCloudCourseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret} isPreview=${
+            isPreview ? 'true' : 'false'
+        }`;
+        context.log(`Executing npm script: ${publishNpmScript}`);
+        const publishScriptResult = execSync(publishNpmScript, {
+            cwd: repositoryFolder
+        }).toString();
 
         if (!publishScriptResult.includes(kenticoScriptCompletedText)) {
             throw Error(`Failed to run script: ${publishScriptResult}`);
