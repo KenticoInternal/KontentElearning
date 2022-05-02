@@ -9,6 +9,7 @@ interface IRequestData {
     scormCloudCourseTitle?: string;
     scormCloudCourseId: string;
     isPreview?: boolean;
+    isFullRebuild?: boolean;
     projectId?: string;
 }
 
@@ -33,6 +34,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const kenticoScriptCompletedText: string = 'KenticoScriptCompleted';
         const scormCloudCourseTitle: string = body.scormCloudCourseTitle ?? '';
         const isPreview: boolean = body.isPreview ?? false;
+        const isFullRebuild: boolean = body.isFullRebuild ?? false;
         const courseId: string = body.courseId;
         const projectId: string = body.projectId;
         const scormCloudCourseId: string = body.scormCloudCourseId;
@@ -42,6 +44,10 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
                 isPreview ? 'preview' : 'prod'
             }' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id. Kontent project id '${projectId}'`
         );
+
+        if (isFullRebuild) {
+            context.log('Using Full rebuild');
+        }
 
         // prepare env variables
         const isDevelopment = environmentHelper.getRequiredValue('IsDevelopment')?.toLowerCase() === 'true';
@@ -171,7 +177,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         const publishNpmScript = `npm run publish:scormcloud  -- courseId="${scormCloudCourseId}" scormAppId="${scormAppId}" scormAppSecret="${scormAppSecret}" isPreview=${
             isPreview ? 'true' : 'false'
-        } title="${scormCloudCourseTitle}"`;
+        } isFullRebuild=${isFullRebuild ? 'true' : 'false'} title="${scormCloudCourseTitle}"`;
         context.log(`Executing npm script: ${publishNpmScript}`);
         const publishScriptResult = execSync(publishNpmScript, {
             cwd: repositoryFolder
