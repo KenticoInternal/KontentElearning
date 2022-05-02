@@ -169,9 +169,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         context.log(`Publishing course '${courseId}'`);
 
-        const publishNpmScript = `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId="${scormCloudCourseId}" scormAppId="${scormAppId}" scormAppSecret="${scormAppSecret}" isPreview=${
+        const publishNpmScript = `npm run publish:scormcloud  -- courseId="${scormCloudCourseId}" scormAppId="${scormAppId}" scormAppSecret="${scormAppSecret}" isPreview=${
             isPreview ? 'true' : 'false'
-        }`;
+        } title="${scormCloudCourseTitle}"`;
         context.log(`Executing npm script: ${publishNpmScript}`);
         const publishScriptResult = execSync(publishNpmScript, {
             cwd: repositoryFolder
