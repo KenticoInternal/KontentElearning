@@ -78,7 +78,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         if (!isDevelopment) {
             process.env[
                 'Path'
-            ] = `C:\\home\\site\\deployments\\tools;C:\\Program Files (x86)\\SiteExtensions\\Kudu\\96.40113.5578\\bin\\Scripts;C:\\Program Files (x86)\\MSBuild\\14.0\\Bin;C:\\Program Files\\Git\\cmd;C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow;C:\\Program Files (x86)\\Microsoft SQL Server\\110\\Tools\\Binn;C:\\Program Files (x86)\\Microsoft SDKs\\F#\\3.1\\Framework\\v4.0;C:\\Program Files\\Git\\bin;C:\\Program Files\\Git\\usr\\bin;C:\\Program Files\\Git\\mingw64\\bin;C:\\Program Files (x86)\\npm\\8.1.0;C:\\Program Files (x86)\\bower\\1.7.9;C:\\Program Files (x86)\\grunt\\0.1.13;C:\\Program Files (x86)\\gulp\\3.9.0.1;C:\\Program Files (x86)\\funcpack\\1.0.0;C:\\Python27;C:\\Program Files (x86)\\PHP\\v5.6;C:\\Program Files (x86)\\nodejs\\16.13.0;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Microsoft Network Monitor 3\\;C:\\Program Files\\Git\\cmd;C:\\Users\\imgadmin\\AppData\\Roaming\\npm;C:\\Program Files (x86)\\nodejs\\;C:\\Program Files (x86)\\Mercurial\\;C:\\Program Files (x86)\\Microsoft ASP.NET\\ASP.NET Web Pages\\v1.0\\;C:\\Windows\\system32\\config\\systemprofile\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Program Files (x86)\\dotnet;C:\\Program Files\\dotnet;C:\\Program Files\\Java\\Adoptium-Eclipse-Temurin-OpenJDK-8u302\\bin`;
+            ] = `C:\\home\\site\\deployments\\tools;C:\\Program Files (x86)\\SiteExtensions\\Kudu\\96.40113.5578\\bin\\Scripts;C:\\Program Files (x86)\\MSBuild\\14.0\\Bin;C:\\Program Files\\Git\\cmd;C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\Common7\\IDE\\CommonExtensions\\Microsoft\\TestWindow;C:\\Program Files (x86)\\Microsoft SQL Server\\110\\Tools\\Binn;C:\\Program Files (x86)\\Microsoft SDKs\\F#\\3.1\\Framework\\v4.0;C:\\Program Files\\Git\\bin;C:\\Program Files\\Git\\usr\\bin;C:\\Program Files\\Git\\mingw64\\bin;C:\\Program Files (x86)\\npm\\8.1.0;D:\\DWASFiles\\Sites\\#1kontent-elearning-builder\\AppData\\npm;C:\\Program Files (x86)\\bower\\1.7.9;C:\\Program Files (x86)\\grunt\\0.1.13;C:\\Program Files (x86)\\gulp\\3.9.0.1;C:\\Program Files (x86)\\funcpack\\1.0.0;C:\\Python27;C:\\Program Files (x86)\\PHP\\v5.6;C:\\Program Files (x86)\\nodejs\\16.13.0;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Microsoft Network Monitor 3\\;C:\\Program Files\\Git\\cmd;C:\\Users\\imgadmin\\AppData\\Roaming\\npm;C:\\Program Files (x86)\\nodejs\\;C:\\Program Files (x86)\\Mercurial\\;C:\\Program Files (x86)\\Microsoft ASP.NET\\ASP.NET Web Pages\\v1.0\\;C:\\Windows\\system32\\config\\systemprofile\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Program Files (x86)\\dotnet;C:\\Program Files\\dotnet;C:\\Program Files\\Java\\Adoptium-Eclipse-Temurin-OpenJDK-8u302\\bin`;
         }
 
         const githubService = new GithubService({
@@ -145,7 +145,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
         const getCourseDataNpmScript = `npm run get:course -- isPreview=${
             isPreview ? 'true' : 'false'
-        } courseId=${courseId} serverUrl=${buildCourseServerUrl} projectId=${projectId}`;
+        } courseId="${courseId}" serverUrl="${buildCourseServerUrl}" projectId="${projectId}"`;
         context.log(`Executing npm script: ${getCourseDataNpmScript}`);
 
         const getCourseScriptResult = execSync(getCourseDataNpmScript, {
@@ -169,7 +169,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         context.log(`Publishing course '${courseId}'`);
 
-        const publishNpmScript = `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId=${scormCloudCourseId} scormAppId=${scormAppId} scormAppSecret=${scormAppSecret} isPreview=${
+        const publishNpmScript = `npm run publish:scormcloud  -- title="${scormCloudCourseTitle}" courseId="${scormCloudCourseId}" scormAppId="${scormAppId}" scormAppSecret="${scormAppSecret}" isPreview=${
             isPreview ? 'true' : 'false'
         }`;
         context.log(`Executing npm script: ${publishNpmScript}`);
