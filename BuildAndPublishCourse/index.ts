@@ -42,9 +42,11 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const scormCloudCourseId: string = body.scormCloudCourseId;
 
         context.log(
-            `Starting process for course '${courseId}' and API '${
-                isPreview ? 'preview' : 'prod'
-            }' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id. Kontent project id '${projectId}'`
+            `Starting process for course '${courseId}' and Kontent API '${
+                isPreview ? 'preview' : 'delivery(prod)'
+            }' with '${scormCloudCourseTitle}' scorm cloud title & '${scormCloudCourseId}' scorm cloud id. Kontent project id '${projectId}'. Course is marked as '${
+                isProd ? 'prod' : 'dev'
+            }'`
         );
 
         if (isFullRebuild) {
