@@ -9,6 +9,7 @@ interface IRequestData {
     scormCloudCourseTitle?: string;
     scormCloudCourseId: string;
     isPreview?: boolean;
+    isProd?: boolean;
     isFullRebuild?: boolean;
     projectId?: string;
 }
@@ -35,6 +36,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const scormCloudCourseTitle: string = body.scormCloudCourseTitle ?? '';
         const isPreview: boolean = body.isPreview ?? false;
         const isFullRebuild: boolean = body.isFullRebuild ?? false;
+        const isProd: boolean = body.isProd ?? false;
         const courseId: string = body.courseId;
         const projectId: string = body.projectId;
         const scormCloudCourseId: string = body.scormCloudCourseId;
@@ -54,7 +56,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         const buildCourseServerUrl = environmentHelper.getRequiredValue('BuildCourseServerUrl');
         const scormAppId = environmentHelper.getRequiredValue('ScormAppId');
         const scormAppSecret = environmentHelper.getRequiredValue('ScormAppSecret');
-        const adaptGhBranch = environmentHelper.getRequiredValue('AdaptGhBranch');
+        const adaptGhProdBranch = environmentHelper.getRequiredValue('adaptGhProdBranch');
+        const adaptGhDevBranch = environmentHelper.getRequiredValue('adaptGhDevBranch');
         const adaptGhUsername = environmentHelper.getRequiredValue('AdaptGhUsername');
         const adaptGhToken = environmentHelper.getRequiredValue('AdaptGhToken');
         const adaptGhOwner = environmentHelper.getRequiredValue('AdaptGhOwner');
@@ -63,11 +66,13 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
         // This is a folder in Azure function where we have write access to
         const azureSharedFolderPath = `D:\\home`;
         const dataFolderName = `e-data`;
-        const commitFolderPrefix = 'gh_';
+        const commitFolderPrefix = `gh_${isProd ? 'prod' : 'dev'}_`;
+
+        // get branch of adapt to use
+        const adaptBranchNameToUse = isProd ? adaptGhProdBranch : adaptGhDevBranch;
 
         // prepare folder where course will be downloaded to
         const mainFolder: string = isDevelopment ? homedir() : azureSharedFolderPath;
-
         const dataFolderPath = `${mainFolder}\\${dataFolderName}`;
 
         // go to working directory where we have write access
@@ -89,7 +94,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         const githubService = new GithubService({
             adaptGhRepository: adaptGhRepository,
-            adaptGhBranch: adaptGhBranch,
+            adaptGhBranch: adaptBranchNameToUse,
             adaptGhOwner: adaptGhOwner,
             adaptGhToken: adaptGhToken,
             adaptGhUsername: adaptGhUsername
@@ -129,9 +134,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
             mkdirSync(commitFolderName);
 
             const githubCloneUrl: string = `https://${adaptGhUsername}:${adaptGhToken}@github.com/${adaptGhOwner}/${adaptGhRepository}`;
-            context.log(`Cloning branch '${adaptGhBranch}' of '${githubCloneUrl}'`);
+            context.log(`Cloning branch '${adaptBranchNameToUse}' of '${githubCloneUrl}'`);
 
-            const gitCloneScript = `git clone -b ${adaptGhBranch} ${githubCloneUrl}`;
+            const gitCloneScript = `git clone -b ${adaptBranchNameToUse} ${githubCloneUrl}`;
             context.log(`Executing git script: ${gitCloneScript}`);
             execSync(gitCloneScript, {
                 cwd: cloneFolder // sets directory context for cloning
@@ -149,8 +154,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         // build & publish course
         context.log(`Getting course data for '${courseId}' using serverUrl '${buildCourseServerUrl}'`);
-        const getCourseDataNpmScript = `npm run get:course -- isPreview=${
-            isPreview ? 'true' : 'false'
+        const getCourseDataNpmScript = `npm run get:course -- isPreview=${isPreview ? 'true' : 'false'} isProd=${
+            isProd ? 'true' : 'false'
         } courseId="${courseId}" serverUrl="${buildCourseServerUrl}" projectId="${projectId}"`;
         context.log(`Executing npm script: ${getCourseDataNpmScript}`);
 
@@ -177,7 +182,9 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
         const publishNpmScript = `npm run publish:scormcloud  -- courseId="${scormCloudCourseId}" scormAppId="${scormAppId}" scormAppSecret="${scormAppSecret}" isPreview=${
             isPreview ? 'true' : 'false'
-        } isFullRebuild=${isFullRebuild ? 'true' : 'false'} title="${scormCloudCourseTitle}"`;
+        } isProd=${isProd ? 'true' : 'false'} isFullRebuild=${
+            isFullRebuild ? 'true' : 'false'
+        } title="${scormCloudCourseTitle}"`;
         context.log(`Executing npm script: ${publishNpmScript}`);
         const publishScriptResult = execSync(publishNpmScript, {
             cwd: repositoryFolder

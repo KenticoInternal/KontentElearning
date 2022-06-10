@@ -1,6 +1,8 @@
 {
     "courseId": "k01",
     "isPreview": false,
+    "isProd": false,
+    "isFullRebuild": false,
     "scormCloudCourseTitle": "My course",
     "scormCloudCourseId": "m02_dev",
     "projectId": "xxx"
